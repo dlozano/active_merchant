@@ -10,7 +10,7 @@ module ActiveMerchant #:nodoc:
         # The BBVA TPV gateway requests the user's credit card details separetly,
         # as such authorize and capture are not supported, and only purchase can be used.
         #
-        # The service does not provide a testing mode, as such all testing must be 
+        # The service does not provide a testing mode, as such all testing must be
         # performed in the service's "Integración" mode (set using the provider's web interface.)
         #
         # This helper requires the credentials to be set before transactions can be peformed.
@@ -19,11 +19,11 @@ module ActiveMerchant #:nodoc:
         # and :secret_key_data are specials that need to be generated inside the BBVA site
         # under the "Descargar Palabra Secreta" section. Basically, the secret key is a value
         # you generate and the key data is the contents of the file that BBVA return.
-        # 
+        #
         # The credentials are used to create and the security signature and should be kept secure.
         #
         # Each transaction request sent REQUIRES a unique ID. Normally, one would expect unique
-        # IDs to be provided by the external service, however this is not the case with the 
+        # IDs to be provided by the external service, however this is not the case with the
         # BBVA TPV.
         #
         class Helper < ActiveMerchant::Billing::Integrations::Helper
@@ -50,7 +50,7 @@ module ActiveMerchant #:nodoc:
 
           mapping :currency, :moneda
           mapping :amount, :importe
-       
+
           # The order number must be numeric!
           mapping :order, 'idtransaccion'
 
@@ -74,7 +74,7 @@ module ActiveMerchant #:nodoc:
           # Convert the currency to the correct ISO Money Code.
           # Only EUR currently supported!
           def currency=( value )
-            add_field mappings[:currency], BbvaTpv.currency_code(value) 
+            add_field mappings[:currency], BbvaTpv.currency_code(value)
           end
 
           def amount=(money)
@@ -100,7 +100,7 @@ module ActiveMerchant #:nodoc:
 
             request['Content-Length'] = #{body.size}
             request['User-Agent'] = "Active Merchant -- http://home.leetsoft.com/am"
-            request['Content-Type'] = "text/xml" 
+            request['Content-Type'] = "text/xml"
 
             http = Net::HTTP.new(uri.host, uri.port)
             http.verify_mode    = OpenSSL::SSL::VERIFY_NONE unless @ssl_strict
@@ -160,7 +160,7 @@ module ActiveMerchant #:nodoc:
                 'xmlns:xsi' => "http://www.w3.org/2001/XMLSchema-instance",
                 'xmlns:xsd' => "http://www.w3.org/2001/XMLSchema"} do
               xml.tag! 'SOAP-ENV:Body' do
-                xml.tag! method, { 
+                xml.tag! method, {
                     'SOAP-ENV:encodingStyle' => 'http://schemas.xmlsoap.org/soap/encoding/',
                     'xmlns' => 'PeticionTPVSoapS' } do
                   xml.tag! 'mensaje', {'xsi:type'=>'xsd:string'}, body # body.gsub(/</, '&lt;').gsub(/>/, '&gt;')
@@ -184,11 +184,11 @@ module ActiveMerchant #:nodoc:
 
           def sign_request
             creds = BbvaTpv::Helper.credentials
-            str = 
+            str =
               creds[:terminal_id].to_s +
               creds[:comercial_id].to_s +
               @fields['idtransaccion'] +
-              (@fields['importe'].gsub(/[\.,]/, '') +
+              @fields['importe'].gsub(/[\.,]/, '') +
               @fields['moneda'] +
               (@fields['localizador'] || '') +
               BbvaTpv::Helper.secret_word
