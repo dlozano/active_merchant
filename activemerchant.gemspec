@@ -29,6 +29,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.add_development_dependency('mocha')
   s.add_development_dependency('rails', '>= 2.3.11')
+
+  # For Sermepa and BBVA TPV support
+  s.add_dependency('nokogiri', '>= 1.4.3.1')
+  
   s.signing_key = ENV['GEM_PRIVATE_KEY']
   s.cert_chain  = ['gem-public_cert.pem']
 end

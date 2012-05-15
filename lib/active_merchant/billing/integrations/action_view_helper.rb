@@ -11,11 +11,11 @@ module ActiveMerchant #:nodoc:
         #
         # The helper creates a scope around a payment service helper
         # which provides the specific mapping for that service.
-        # 
-        #  <% payment_service_for 1000, 'paypalemail@mystore.com',
-        #                               :amount => 50.00, 
-        #                               :currency => 'CAD', 
-        #                               :service => :paypal, 
+        #
+        #  <%= payment_service_for 1000, 'paypalemail@mystore.com',
+        #                               :amount => 50.00,
+        #                               :currency => 'CAD',
+        #                               :service => :paypal,
         #                               :html => { :id => 'payment-form' } do |service| %>
         #
         #    <% service.customer :first_name => 'Cody',
@@ -39,28 +39,45 @@ module ActiveMerchant #:nodoc:
         #    <% service.cancel_return_url 'http://mystore.com' %>
         #  <% end %>
         #
-        def payment_service_for(order, account, options = {}, &proc)          
+        def payment_service_for(order, account, options = {}, &proc)
           raise ArgumentError, "Missing block" unless block_given?
 
           integration_module = ActiveMerchant::Billing::Integrations.const_get(options.delete(:service).to_s.camelize)
 
           result = []
-          result << form_tag(integration_module.service_url, options.delete(:html) || {})
-          
+
+          if ignore_binding?
+            result << form_tag(integration_module.service_url, options.delete(:html) || {})
+          else
+            concat(form_tag(integration_module.service_url, options.delete(:html) || {}), proc.binding)
+          end
+
           service_class = integration_module.const_get('Helper')
           service = service_class.new(order, account, options)
 
-          result << capture(service, &proc)
+          if ignore_binding?
+            result << capture(service, &proc)
+          else
+            yield service
+          end
 
           service.form_fields.each do |field, value|
             result << hidden_field_tag(field, value)
           end
-         
+
           result << '</form>'
-          result= result.join("\n")
-          
-          concat(result.respond_to?(:html_safe) ? result.html_safe : result)
-          nil
+
+          if ignore_binding?
+            result.join("\n").html_safe
+          else
+            concat(result.join("\n"), proc.binding)
+          end
+        end
+
+        private
+
+        def ignore_binding?
+          ActionPack::VERSION::MAJOR >= 3 || (ActionPack::VERSION::MAJOR >= 2 && ActionPack::VERSION::MINOR >= 2)
         end
       end
     end
