@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../../../test_helper'
 
 class BbvaTpvHelperTest < Test::Unit::TestCase
   include ActiveMerchant::Billing::Integrations
-  
+
   def setup
     BbvaTpv::Helper.credentials = {
         :terminal_id => '999999',
@@ -13,7 +13,7 @@ class BbvaTpvHelperTest < Test::Unit::TestCase
     @helper = BbvaTpv::Helper.new(1, 'cody@example.com', :amount => 100, :currency => 'EUR')
     @helper.description = "Store Purchase"
   end
- 
+
   def test_basic_helper_fields
     assert_field 'account', 'cody@example.com'
     assert_field 'importe', '1.00'
@@ -21,7 +21,7 @@ class BbvaTpvHelperTest < Test::Unit::TestCase
     assert_field 'localizador', 'Store Purchase'
     assert_field 'moneda', '978'
   end
-  
+
   def test_address_mapping
     @helper.billing_address :address1 => '1 My Street',
                             :address2 => '',
@@ -29,10 +29,10 @@ class BbvaTpvHelperTest < Test::Unit::TestCase
                             :state => 'Yorkshire',
                             :zip => 'LS2 7EE',
                             :country  => 'ES'
-   
+
     assert_field 'pais', 'ES'
   end
-  
+
   def test_unknown_address_mapping
     @helper.billing_address :farm => 'CA'
     assert_equal 6, @helper.fields.size
@@ -43,7 +43,7 @@ class BbvaTpvHelperTest < Test::Unit::TestCase
       @helper.company_address :address => '500 Dwemthy Fox Road'
     end
   end
-  
+
   def test_setting_invalid_address_field
     fields = @helper.fields.dup
     @helper.billing_address :street => 'My Street'
@@ -56,7 +56,7 @@ class BbvaTpvHelperTest < Test::Unit::TestCase
   end
 
   def test_desobfustication_of_secret_key
-    assert key = BbvaTpv::Helper.desobfusticate_secret_key
+    assert key = BbvaTpv::Helper.secret_word
     assert_equal "878CC4B6F999740B0633", key   # Key tested with BBVA code!
   end
 
