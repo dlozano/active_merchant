@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'nokogiri'
 
 module ActiveMerchant #:nodoc:
@@ -8,13 +9,13 @@ module ActiveMerchant #:nodoc:
 
           def complete?
             status == 'Completed'
-          end 
+          end
 
           def transaction_id
             params['idtransaccion']
           end
 
-          # When was this payment received by the client. 
+          # When was this payment received by the client.
           def received_at
             Time.parse(params['fechahora'])
           end
@@ -30,7 +31,7 @@ module ActiveMerchant #:nodoc:
           end
 
           def currency
-            BbvaTpv.currency_from_code( params['moneda'] ) 
+            BbvaTpv.currency_from_code( params['moneda'] )
           end
 
           # Status result provided as one of:
@@ -48,25 +49,25 @@ module ActiveMerchant #:nodoc:
             end
           end
 
-          # Acknowledge the transaction to BbvaTpv. This method has to be called after a new 
-          # apc arrives. BbvaTpv will verify that all the information we received are correct and will return a 
-          # ok or a fail. 
+          # Acknowledge the transaction to BbvaTpv. This method has to be called after a new
+          # apc arrives. BbvaTpv will verify that all the information we received are correct and will return a
+          # ok or a fail.
           #
           # This currently uses the signature provided to confirm the information is valid, rather than sending
           # a request to the server.
-          # 
+          #
           # Example:
-          # 
+          #
           #   def ipn
           #     notify = BbvaTpvNotification.new(params)
           #
-          #     if notify.acknowledge 
+          #     if notify.acknowledge
           #       ... process order ... if notify.complete?
           #     else
           #       ... log possible hacking attempt ...
           #     end
           def acknowledge
-            str = 
+            str =
               params['idterminal'] +
               params['idcomercio'] +
               params['idtransaccion'] +
@@ -88,7 +89,7 @@ module ActiveMerchant #:nodoc:
           # parameters. If this is the case, the expected 'peticion' parameter will be used to extract
           # the information. Passing a raw query string WILL NOT work here!
           #
-          # Raw data (String) will be parsed as XML. 
+          # Raw data (String) will be parsed as XML.
           #
           # Searches for the root 'tpv' tag and searches two levels deep for
           # all the entries.
