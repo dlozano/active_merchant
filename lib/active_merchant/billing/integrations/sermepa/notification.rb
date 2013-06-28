@@ -10,13 +10,13 @@ module ActiveMerchant #:nodoc:
 
           def complete?
             status == 'Completed'
-          end 
+          end
 
           def transaction_id
             params['ds_order']
           end
 
-          # When was this payment received by the client. 
+          # When was this payment received by the client.
           def received_at
             if params['ds_date']
               (day, month, year) = params['ds_date'].split('/')
@@ -37,7 +37,7 @@ module ActiveMerchant #:nodoc:
           end
 
           def currency
-            Sermepa.currency_from_code( params['ds_currency'] ) 
+            Sermepa.currency_from_code( params['ds_currency'] )
           end
 
           # Status of transaction. List of possible values:
@@ -63,7 +63,7 @@ module ActiveMerchant #:nodoc:
             msg = Sermepa.response_code_message(error_code)
             error_code.to_s + ' - ' + (msg.nil? ? 'Operación Aceptada' : msg)
           end
-          
+
           def secure_payment?
             params['ds_securepayment'] == '1'
           end
@@ -73,11 +73,11 @@ module ActiveMerchant #:nodoc:
           # Validate the details provided by the gateway by ensuring that the signature
           # matches up with the details provided.
           #
-          # Optionally, a set of credentials can be provided that should contain a 
+          # Optionally, a set of credentials can be provided that should contain a
           # :secret_key instead of using the global credentials defined in the Sermepa::Helper.
           #
           # Example:
-          # 
+          #
           #   def notify
           #     notify = Sermepa::Notification.new(request.query_parameters)
           #
@@ -90,10 +90,16 @@ module ActiveMerchant #:nodoc:
           #
           def acknowledge(credentials = nil)
             return false if params['ds_signature'].blank?
-            str = 
+            signature(credentials).upcase == params['ds_signature'].to_s.upcase
+          end
+
+          private
+
+          def signature(credentials = nil)
+            str =
               params['ds_amount'].to_s +
               params['ds_order'].to_s +
-              params['ds_merchantcode'].to_s + 
+              params['ds_merchantcode'].to_s +
               params['ds_currency'].to_s +
               params['ds_response'].to_s
             if xml?
@@ -101,11 +107,8 @@ module ActiveMerchant #:nodoc:
             end
 
             str += (credentials || Sermepa::Helper.credentials)[:secret_key]
-            sig = Digest::SHA1.hexdigest(str)
-            sig.upcase == params['ds_signature'].to_s.upcase
+            Digest::SHA1.hexdigest(str)
           end
-
-          private
 
           def xml?
             !params['code'].blank?
@@ -123,7 +126,7 @@ module ActiveMerchant #:nodoc:
               # XML source
               self.params = xml_response_to_hash(@raw)
             else
-              for line in post.to_s.split('&')    
+              for line in post.to_s.split('&')
                 key, value = *line.scan( %r{^([A-Za-z0-9_.]+)\=(.*)$} ).flatten
                 params[key.downcase] = CGI.unescape(value)
               end
@@ -140,7 +143,7 @@ module ActiveMerchant #:nodoc:
             result['code'] = doc.css('RETORNOXML CODIGO').inner_text
             result
           end
- 
+
         end
       end
     end
