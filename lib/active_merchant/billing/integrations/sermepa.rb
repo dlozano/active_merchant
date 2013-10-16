@@ -9,7 +9,7 @@ module ActiveMerchant #:nodoc:
         autoload :Helper, 'active_merchant/billing/integrations/sermepa/helper.rb'
         autoload :Return, 'active_merchant/billing/integrations/sermepa/return.rb'
         autoload :Notification, 'active_merchant/billing/integrations/sermepa/notification.rb'
-       
+
         mattr_accessor :service_test_url
         self.service_test_url = "https://sis-t.sermepa.es:25443/sis/realizarPago"
         mattr_accessor :service_production_url
@@ -21,7 +21,7 @@ module ActiveMerchant #:nodoc:
         self.operations_production_url = "https://sis.sermepa.es/sis/operaciones"
 
 
-        def self.service_url 
+        def self.service_url
           mode = ActiveMerchant::Billing::Base.integration_mode
           case mode
           when :production
@@ -91,7 +91,15 @@ module ActiveMerchant #:nodoc:
             [:ca, '003'],
             [:fr, '004'],
             [:de, '005'],
-            [:pt, '009']
+            [:nl, '006'],
+            [:it, '007'],
+            [:sv, '008'],
+            [:pt, '009'],
+            # I don't have a iso code different to catalan
+            #[:ca_VA, '010'],
+            [:pl, '011'],
+            [:gl, '012'],
+            [:eu, '013']
           ]
         end
 
